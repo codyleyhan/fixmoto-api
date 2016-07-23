@@ -1,0 +1,7 @@
+#ignores node_modules, use npm install to install packages
+node_modules
+
+#ignores .env file
+.env
+
+npm-debug.log
