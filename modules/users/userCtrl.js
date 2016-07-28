@@ -19,6 +19,7 @@ const userCtrl = {
       return res.json(message);
     }).catch(err => {
       return res.json({
+        message: 'There was a problem making the request',
         error: err.message
       });
     });

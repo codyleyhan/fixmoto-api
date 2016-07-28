@@ -6,6 +6,10 @@ const uuid = require('uuid');
 const userService = {
   getAll: function(limit = 10, offset = 0) {
     return new Promise((resolve, reject) => {
+      if(limit < 0 || offset < 0) {
+        throw new Error('Limit and offset must be positive numbers');
+      }
+
       User.limit(limit).skip(offset*limit).run().then(users => {
         return resolve(users);
       }).error(err => {
