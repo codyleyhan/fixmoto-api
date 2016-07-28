@@ -1,33 +1,27 @@
-module.exports = (sequelize, DataTypes) => {
-  const User = sequelize.define("User", {
-    email: {
-      type: DataTypes.STRING,
-      unique: true,
-      allowNull: false,
-      validate: {
-        isEmail: true
-      }
-    },
-    hash: DataTypes.STRING,
-    verifyToken: {
-      type: DataTypes.UUID,
-      unique: true,
-    },
-    resetToken: {
-      type: DataTypes.UUID,
-      unique: true,
-    },
-    admin: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    }
-  }, {
-    classMethods: {
-      associate: (models) => {
-        User.hasMany(models.Vehicle);
-      }
-    }
-  });
+const thinky = require('../config/db');
+const type = thinky.type;
 
-  return User;
-};
+
+const User = thinky.createModel('User', {
+  id: type.string(),
+  email: type.string().email().lowercase().required(),
+  hash: type.string().required().length(60),
+  tokens: {
+    verify: type.string().uuid(4),
+    reset: type.string().uuid(4),
+  },
+  admin: type.boolean().default(false),
+  createdAt: type.date().default(new Date()),
+  updatedAt: type.date().default(new Date())
+});
+
+
+User.define('isVerified', function() {
+  return this.tokens.verify === null;
+});
+
+module.exports = User;
+
+// Relations
+let Vehicle = require('./Vehicle');
+User.hasMany(Vehicle, 'vehicles', 'id', 'userId');

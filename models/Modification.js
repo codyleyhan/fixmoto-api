@@ -1,21 +1,21 @@
-module.exports = (sequelize, DataTypes) => {
-  const Modification = sequelize.define("Modification", {
-    description: DataTypes.STRING,
-    product: DataTypes.STRING,
-    date: DataTypes.DATE,
-    mechanic: DataTypes.STRING
-  }, {
-    classMethods: {
-      associate: (models) => {
-        Modification.belongsTo(models.Vehicle, {
-          onDelete: "CASCADE",
-          foreignKey: {
-            allowNull: false
-          }
-        });
-      }
-    }
-  });
+const thinky = require('../config/db');
+const type = thinky.type;
 
-  return Modification;
-};
+
+const Modification = thinky.createModel('Modification', {
+  id: type.string().required(),
+  vehicleId: type.string().required(),
+  description: type.string(),
+  product: type.string(),
+  date: type.date().default(new Date()),
+  mechanic: type.string(),
+  createdAt: type.date().default(new Date()),
+  updatedAt: type.date().default(new Date())
+});
+
+
+module.exports = Modification;
+
+// Relations
+const Vehicle = require('./Vehicle');
+Modification.belongsTo(Vehicle, 'vehicle', 'vehicleId', 'id');

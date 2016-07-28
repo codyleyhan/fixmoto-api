@@ -1,22 +1,22 @@
-module.exports = (sequelize, DataTypes) => {
-  const Record = sequelize.define("Record", {
-    mileage: DataTypes.INTEGER,
-    mechanic: DataTypes.STRING,
-    date: DataTypes.DATE
-  }, {
-    classMethods: {
-      associate: (models) => {
-        Record.belongsTo(models.Vehicle, {
-          onDelete: "CASCADE",
-          foreignKey: {
-            allowNull: false
-          }
-        });
+const thinky = require('../config/db');
+const type = thinky.type;
 
-        Record.hasMany(models.Maintenance);
-      }
-    }
-  });
 
-  return Record;
-};
+const Record = thinky.createModel('Record', {
+  id: type.string().required(),
+  vehicleId: type.string().required(),
+  mileage: type.number(),
+  mechanic: type.string(),
+  date: type.date().default(new Date()),
+  createdAt: type.date().default(new Date()),
+  updatedAt: type.date().default(new Date())
+});
+
+module.exports = Record;
+
+// Relations
+const Vehicle = require('./Vehicle');
+Record.belongsTo(Vehicle, 'vehicle', 'vehicleId', 'id');
+
+const Maintenance = require('./Maintenance');
+Record.hasMany(Maintenance, 'maintenance', 'id', 'recordId');

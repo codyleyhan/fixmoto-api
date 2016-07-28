@@ -12,6 +12,7 @@ const app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 app.use(helmet());
 app.use(logger('dev'));
@@ -20,12 +21,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(compression());
 
-app.use('/', (req, res) => {
-  const models = require('./models');
-  models.User.findAll().then((users) => {
-    return res.json(users);
-  });
-});
+const routes = require('./Routes');
+app.use(routes);
+
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
