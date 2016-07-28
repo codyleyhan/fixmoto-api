@@ -3,7 +3,7 @@ const type = thinky.type;
 
 
 const Maintenance = thinky.createModel('Maintenance', {
-  id: type.string().required(),
+  id: type.string(),
   recordId: type.string().required(),
   work: type.string(),
   product: type.string(),
@@ -11,6 +11,8 @@ const Maintenance = thinky.createModel('Maintenance', {
   createdAt: type.date().default(new Date()),
   updatedAt: type.date().default(new Date())
 });
+
+Maintenance.ensureIndex("createdAt");
 
 module.exports = Maintenance;
 

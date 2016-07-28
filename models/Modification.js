@@ -3,7 +3,7 @@ const type = thinky.type;
 
 
 const Modification = thinky.createModel('Modification', {
-  id: type.string().required(),
+  id: type.string(),
   vehicleId: type.string().required(),
   description: type.string(),
   product: type.string(),
@@ -13,6 +13,7 @@ const Modification = thinky.createModel('Modification', {
   updatedAt: type.date().default(new Date())
 });
 
+Modification.ensureIndex("createdAt");
 
 module.exports = Modification;
 

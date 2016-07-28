@@ -3,7 +3,7 @@ const type = thinky.type;
 
 
 const Record = thinky.createModel('Record', {
-  id: type.string().required(),
+  id: type.string(),
   vehicleId: type.string().required(),
   mileage: type.number(),
   mechanic: type.string(),
@@ -11,6 +11,8 @@ const Record = thinky.createModel('Record', {
   createdAt: type.date().default(new Date()),
   updatedAt: type.date().default(new Date())
 });
+
+Record.ensureIndex("createdAt");
 
 module.exports = Record;
 

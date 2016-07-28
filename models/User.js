@@ -15,6 +15,7 @@ const User = thinky.createModel('User', {
   updatedAt: type.date().default(new Date())
 });
 
+User.ensureIndex("createdAt");
 
 User.define('isVerified', function() {
   return this.tokens.verify === null;
