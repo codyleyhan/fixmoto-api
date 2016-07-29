@@ -7,18 +7,19 @@ const Record = thinky.createModel('Record', {
   vehicleId: type.string().required(),
   mileage: type.number(),
   mechanic: type.string(),
+  description: type.string(),
+  product: type.string(),
+  amount: type.string(),
   date: type.date().default(new Date()),
   createdAt: type.date().default(new Date()),
   updatedAt: type.date().default(new Date())
 });
 
 Record.ensureIndex("createdAt");
+Record.ensureIndex("vehicleId");
 
 module.exports = Record;
 
 // Relations
 const Vehicle = require('./Vehicle');
 Record.belongsTo(Vehicle, 'vehicle', 'vehicleId', 'id');
-
-const Maintenance = require('./Maintenance');
-Record.hasMany(Maintenance, 'maintenance', 'id', 'recordId');

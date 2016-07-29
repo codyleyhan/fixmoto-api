@@ -5,14 +5,15 @@ const userCtrl = {
     const limit = parseInt(req.query.limit) || parseInt(req.body.limit) || 10;
     const offset = parseInt(req.query.offset) || parseInt(req.body.offset) || 0;
 
-    userService.getAll(limit, offset).then(users => {
+    userService.getAll(limit, offset).then(result => {
       const message = {
         meta: {
           limit,
-          offset
+          offset,
+          count: result.count
         },
         data: {
-          users
+          users: result.users
         }
       };
 

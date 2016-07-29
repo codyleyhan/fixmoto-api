@@ -99,9 +99,7 @@ const vehicleService = {
 
       // DB joins to be done
       const joins = {
-        records: {
-          maintenance: true
-        },
+        records: true,
         modifications: true
       };
 
@@ -177,15 +175,15 @@ const vehicleService = {
 
       this.getVehicle(id).then(vehicle => {
 
-        vehicle.merge(newVehicle).save().then(vehicle => {
+        return vehicle.merge(newVehicle).save();
 
-          return resolve(vehicle);
+      }).then(vehicle => {
 
-        });
+        return resolve(vehicle);
 
       }).catch(err => {
 
-        reject(err);
+        return reject(err);
 
       });
 
@@ -200,14 +198,19 @@ const vehicleService = {
   deleteVehicle: function(id) {
     return new Promise((resolve, reject) => {
 
-      Vehicle.get(id).run().then(vehicle => {
+      const joins = {
+        records: true,
+        modifications: true
+      };
 
-        vehicle.purge().then(vehicle => {
+      Vehicle.get(id).getJoin(joins).run().then(vehicle => {
+        return vehicle.deleteAll();
 
-          return resolve(true);
+      }).then(vehicle => {
 
-        });
-      }).error(err => {
+        return resolve(true);
+
+      }).catch(err => {
 
         if(err.name == 'DocumentNotFoundError') {
           err.message = `Unable to find vehicle with id of ${id}`;

@@ -14,7 +14,7 @@ const Modification = thinky.createModel('Modification', {
 });
 
 Modification.ensureIndex("createdAt");
-Modification.ensureIndex("vehicleId")
+Modification.ensureIndex("vehicleId");
 
 module.exports = Modification;
 

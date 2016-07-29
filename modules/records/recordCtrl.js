@@ -1,13 +1,13 @@
-const modService = require('./modService');
+const recordService = require('./recordService');
 
-const modCtrl = {
+const recordCtrl = {
   index: function(req, res) {
     if(req.query.vehicleId) {
       const id = req.query.vehicleId;
-      modService.getAllByVehicleId(id).then(modifications => {
+      recordService.getAllByVehicleId(id).then(records => {
         const message = {
           data: {
-            modifications
+            records
           }
         };
 
@@ -23,7 +23,7 @@ const modCtrl = {
       const limit = parseInt(req.query.limit) || parseInt(req.body.limit) || 10;
       const offset = parseInt(req.query.offset) || parseInt(req.body.offset) || 0;
 
-      modService.getAll(limit, offset).then(result => {
+      recordService.getAll(limit, offset).then(result => {
         const message = {
           meta: {
             limit,
@@ -31,7 +31,7 @@ const modCtrl = {
             count: result.count
           },
           data: {
-            modifications: result.mods
+            records: result.records
           }
         };
 
@@ -46,12 +46,12 @@ const modCtrl = {
   },
 
   show: function(req, res) {
-    const id = req.params.modId;
+    const id = req.params.recordId;
 
-    modService.getMod(id).then(modification => {
+    recordService.getRecord(id).then(record => {
       const message = {
         data: {
-          modification
+          record
         }
       };
 
@@ -67,10 +67,10 @@ const modCtrl = {
   },
 
   create: function(req, res) {
-    modService.addMod(req.body).then(modification => {
+    recordService.addRecord(req.body).then(record => {
       const message = {
         data: {
-          modification
+          record
         }
       };
       return res.status(201).json(message);
@@ -85,10 +85,10 @@ const modCtrl = {
   },
 
   update: function(req, res) {
-    modService.editMod(req.params.modId, req.body).then(modification => {
+    recordService.editRecord(req.params.recordId, req.body).then(record => {
       const message = {
         data: {
-          modification
+          record
         }
       };
       return res.status(200).json(message);
@@ -101,10 +101,10 @@ const modCtrl = {
   },
 
   delete: function(req, res) {
-    modService.deleteMod(req.params.modId).then(result => {
+    recordService.deleteRecord(req.params.recordId).then(result => {
       if(result === true) {
         const message = {
-          message: `The modification with id of ${req.params.modId} has been deleted`
+          message: `The recordwith id of ${req.params.recordId} has been deleted`
         };
 
         return res.status(200).json(message);
@@ -112,7 +112,7 @@ const modCtrl = {
     }).catch(err => {
       const message = {
         message: 'There was a problem making your request',
-        error: err.message
+        error: err.name
       };
 
       return res.status(404).json(message);
@@ -120,4 +120,4 @@ const modCtrl = {
   }
 };
 
-module.exports = modCtrl;
+module.exports = recordCtrl;
