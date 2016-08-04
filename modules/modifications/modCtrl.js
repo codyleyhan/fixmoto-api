@@ -1,123 +1,130 @@
 const modService = require('./modService');
+const errorHandler = require('../errorHandler');
 
 const modCtrl = {
-  index: function(req, res) {
-    if(req.query.vehicleId) {
-      const id = req.query.vehicleId;
-      modService.getAllByVehicleId(id).then(modifications => {
-        const message = {
-          data: {
-            modifications
-          }
-        };
+	index: function(req, res) {
+		if(req.query.vehicleId || req.body.vehicleId) {
+			if(!req.body.vehicleId) {
+				req.body.vehicleId = req.query.vehicleId;
+			}
 
-        return res.json(message);
-      }).catch(err => {
-        return res.status(400).json({
-          message: 'There was a problem making the request',
-          error: err.message
-        });
-      });
-    } else {
+			modService.getAllByVehicleId(req.body).then(modifications => {
 
-      const limit = parseInt(req.query.limit) || parseInt(req.body.limit) || 10;
-      const offset = parseInt(req.query.offset) || parseInt(req.body.offset) || 0;
+				const message = {
+					data: {
+						modifications
+					}
+				};
 
-      modService.getAll(limit, offset).then(result => {
-        const message = {
-          meta: {
-            limit,
-            offset,
-            count: result.count
-          },
-          data: {
-            modifications: result.mods
-          }
-        };
+				return res.json(message);
 
-        return res.json(message);
-      }).catch(err => {
-        return res.status(400).json({
-          message: 'There was a problem making the request',
-          error: err.message
-        });
-      });
-    }
-  },
+			}).catch(err => {
+				return errorHandler(req, res, err, 400);
+			});
+		} else {
 
-  show: function(req, res) {
-    const id = req.params.modId;
+			if(!req.user.admin) {
+				return res.status(403).json({
+					message: 'You are not authorized',
+					error: 'AuthorizationError'
+				});
+			}
 
-    modService.getMod(id).then(modification => {
-      const message = {
-        data: {
-          modification
-        }
-      };
+			const limit = parseInt(req.query.limit) || parseInt(req.body.limit) || 10;
+			const offset = parseInt(req.query.offset) || parseInt(req.body.offset) || 0;
 
-      return res.json(message);
-    }).catch(err => {
-      const message = {
-        message: 'There was a problem making your request',
-        error: err.message
-      };
+			modService.getAll(limit, offset).then(result => {
+				const message = {
+					meta: {
+						limit,
+						offset,
+						count: result.count
+					},
+					data: {
+						modifications: result.mods
+					}
+				};
 
-      return res.status(400).json(message);
-    });
-  },
+				return res.json(message);
+			}).catch(err => {
+				return errorHandler(req, res, err, 400);
+			});
+		}
+	},
 
-  create: function(req, res) {
-    modService.addMod(req.body).then(modification => {
-      const message = {
-        data: {
-          modification
-        }
-      };
-      return res.status(201).json(message);
-    }).catch(err => {
-      const message = {
-        message: 'There was a problem making the request',
-        error: err.message
-      };
+	show: function(req, res) {
+		const id = req.params.modId;
 
-      return res.status(400).json(message);
-    });
-  },
+		modService.getMod(id).then(modification => {
+			if(modification.userId !== req.user.id && !req.user.admin) {
+				return res.status(403).json({
+					message: 'You are not authorized',
+					error: 'AuthorizationError'
+				});
+			}
 
-  update: function(req, res) {
-    modService.editMod(req.params.modId, req.body).then(modification => {
-      const message = {
-        data: {
-          modification
-        }
-      };
-      return res.status(200).json(message);
-    }).catch(err => {
-      return res.status(400).json({
-        message: 'There was a problem making the request',
-        error: err.message
-      });
-    });
-  },
+			const message = {
+				data: {
+					modification
+				}
+			};
 
-  delete: function(req, res) {
-    modService.deleteMod(req.params.modId).then(result => {
-      if(result === true) {
-        const message = {
-          message: `The modification with id of ${req.params.modId} has been deleted`
-        };
+			return res.json(message);
+		}).catch(err => {
+			return errorHandler(req, res, err, 400);
+		});
+	},
 
-        return res.status(200).json(message);
-      }
-    }).catch(err => {
-      const message = {
-        message: 'There was a problem making your request',
-        error: err.message
-      };
+	create: function(req, res) {
+		if(!req.body.vehicleId) {
+			return res.status(400).json({
+				message: 'Missing vehicle id.',
+				error: 'missing data'
+			});
+		}
 
-      return res.status(404).json(message);
-    });
-  }
+		modService.addMod(req.body).then(modification => {
+			const message = {
+				data: {
+					modification
+				}
+			};
+			return res.status(201).json(message);
+		}).catch(err => {
+			return errorHandler(req, res, err, 400);
+		});
+	},
+
+	update: function(req, res) {
+		req.body.modId = req.params.modId;
+
+		modService.editMod(req.body).then(modification => {
+			const message = {
+				data: {
+					modification
+				}
+			};
+			return res.status(200).json(message);
+		}).catch(err => {
+			return errorHandler(req, res, err, 400);
+		});
+	},
+
+	delete: function(req, res) {
+		req.body.modId = req.params.modId;
+
+		modService.deleteMod(req.body).then(result => {
+			if(result === true) {
+				const message = {
+					message: `The modification with id of ${req.params.modId} has been deleted`
+				};
+
+				return res.status(200).json(message);
+			}
+		}).catch(err => {
+			return errorHandler(req, res, err, 400);
+		});
+	}
 };
 
 module.exports = modCtrl;

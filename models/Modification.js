@@ -3,18 +3,19 @@ const type = thinky.type;
 
 
 const Modification = thinky.createModel('Modification', {
-  id: type.string(),
-  vehicleId: type.string().required(),
-  description: type.string(),
-  product: type.string(),
-  date: type.date().default(new Date()),
-  mechanic: type.string(),
-  createdAt: type.date().default(new Date()),
-  updatedAt: type.date().default(new Date())
+	id: type.string(),
+	vehicleId: type.string().required(),
+	userId: type.string().required(),
+	description: type.string(),
+	product: type.string(),
+	date: type.date().default(new Date()),
+	mechanic: type.string(),
+	createdAt: type.date().default(new Date()),
+	updatedAt: type.date().default(new Date())
 });
 
-Modification.ensureIndex("createdAt");
-Modification.ensureIndex("vehicleId");
+Modification.ensureIndex('createdAt');
+Modification.ensureIndex('vehicleId');
 
 module.exports = Modification;
 

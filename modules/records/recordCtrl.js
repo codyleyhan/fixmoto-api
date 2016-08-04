@@ -1,123 +1,126 @@
 const recordService = require('./recordService');
+const errorHandler = require('../errorHandler');
 
 const recordCtrl = {
-  index: function(req, res) {
-    if(req.query.vehicleId) {
-      const id = req.query.vehicleId;
-      recordService.getAllByVehicleId(id).then(records => {
-        const message = {
-          data: {
-            records
-          }
-        };
+	index: function(req, res) {
+		if (req.query.vehicleId || req.body.vehicleId) {
 
-        return res.json(message);
-      }).catch(err => {
-        return res.status(400).json({
-          message: 'There was a problem making the request',
-          error: err.message
-        });
-      });
-    } else {
+			if (!req.body.vehicleId) {
+				req.body.vehicleId = req.query.vehicleId;
+			}
 
-      const limit = parseInt(req.query.limit) || parseInt(req.body.limit) || 10;
-      const offset = parseInt(req.query.offset) || parseInt(req.body.offset) || 0;
 
-      recordService.getAll(limit, offset).then(result => {
-        const message = {
-          meta: {
-            limit,
-            offset,
-            count: result.count
-          },
-          data: {
-            records: result.records
-          }
-        };
+			recordService.getAllByVehicleId(req.body).then(records => {
 
-        return res.json(message);
-      }).catch(err => {
-        return res.status(400).json({
-          message: 'There was a problem making the request',
-          error: err.message
-        });
-      });
-    }
-  },
+				const message = {
+					data: {
+						records
+					}
+				};
 
-  show: function(req, res) {
-    const id = req.params.recordId;
+				return res.json(message);
+			}).catch(err => {
+				return errorHandler(req, res, err, 400);
+			});
 
-    recordService.getRecord(id).then(record => {
-      const message = {
-        data: {
-          record
-        }
-      };
 
-      return res.json(message);
-    }).catch(err => {
-      const message = {
-        message: 'There was a problem making your request',
-        error: err.message
-      };
+		} else {
 
-      return res.status(400).json(message);
-    });
-  },
+			if(!req.user.admin) {
+				return res.status(403).json({
+					message: 'You are not authorized',
+					error: 'AuthorizationError'
+				});
+			}
 
-  create: function(req, res) {
-    recordService.addRecord(req.body).then(record => {
-      const message = {
-        data: {
-          record
-        }
-      };
-      return res.status(201).json(message);
-    }).catch(err => {
-      const message = {
-        message: 'There was a problem making the request',
-        error: err.message
-      };
+			const limit = parseInt(req.query.limit) || parseInt(req.body.limit) || 10;
+			const offset = parseInt(req.query.offset) || parseInt(req.body.offset) || 0;
 
-      return res.status(400).json(message);
-    });
-  },
+			recordService.getAll(limit, offset).then(result => {
+				const message = {
+					meta: {
+						limit,
+						offset,
+						count: result.count
+					},
+					data: {
+						records: result.records
+					}
+				};
 
-  update: function(req, res) {
-    recordService.editRecord(req.params.recordId, req.body).then(record => {
-      const message = {
-        data: {
-          record
-        }
-      };
-      return res.status(200).json(message);
-    }).catch(err => {
-      return res.status(400).json({
-        message: 'There was a problem making the request',
-        error: err.message
-      });
-    });
-  },
+				return res.json(message);
+			}).catch(err => {
+				return errorHandler(req, res, err);
+			});
+		}
+	},
 
-  delete: function(req, res) {
-    recordService.deleteRecord(req.params.recordId).then(result => {
-      if(result === true) {
-        const message = {
-          message: `The recordwith id of ${req.params.recordId} has been deleted`
-        };
+	show: function(req, res) {
+		const id = req.params.recordId;
 
-        return res.status(200).json(message);
-      }
-    }).catch(err => {
-      const message = {
-        message: 'There was a problem making your request',
-        error: err.name
-      };
+		recordService.getRecord(id).then(record => {
+			if(record.userId !== req.user.id && !req.user.admin) {
+				let err = new Error('You are not authorized');
+				err.name = 'AuthorizationError';
+				throw err;
+			}
 
-      return res.status(404).json(message);
-    });
-  }
+			const message = {
+				data: {
+					record
+				}
+			};
+
+			return res.json(message);
+		}).catch(err => {
+			return errorHandler(req, res, err, 400);
+		});
+	},
+
+	create: function(req, res) {
+		recordService.addRecord(req.body).then(record => {
+			const message = {
+				data: {
+					record
+				}
+			};
+
+			return res.status(201).json(message);
+		}).catch(err => {
+			return errorHandler(req, res, err, 400);
+		});
+	},
+
+	update: function(req, res) {
+		req.body.recordId = req.params.recordId;
+
+		recordService.editRecord(req.body).then(record => {
+			const message = {
+				data: {
+					record
+				}
+			};
+			return res.status(200).json(message);
+		}).catch(err => {
+			return errorHandler(req, res, err, 400);
+		});
+	},
+
+	delete: function(req, res) {
+		req.body.recordId = req.params.recordId;
+
+		recordService.deleteRecord(req.body).then(result => {
+			if(result === true) {
+				const message = {
+					message: `The record with id of ${req.params.recordId} has been deleted`
+				};
+
+				return res.status(200).json(message);
+			}
+		}).catch(err => {
+			return errorHandler(req, res, err, 400);
+		});
+	}
 };
 
 module.exports = recordCtrl;
