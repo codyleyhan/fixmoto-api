@@ -5,6 +5,7 @@ const vehicleCtrl = require('./modules/vehicles/vehicleCtrl');
 const modCtrl = require('./modules/modifications/modCtrl');
 const recordCtrl = require('./modules/records/recordCtrl');
 const authCtrl = require('./modules/auth/authCtrl');
+const errorHandler = require('./modules/errorHandler');
 
 
 const authCheck = authCtrl.decode;
@@ -53,5 +54,13 @@ Router.get('/api/v1/records/:recordId', recordCtrl.show);
 Router.put('/api/v1/records/:recordId', recordCtrl.update);
 Router.delete('/api/v1/records/:recordId', recordCtrl.delete);
 
+
+Router.use('/api', (req, res) => {
+	const err = new Error('There was a problem with the request.');
+	return res.status(404).json({
+		message: 'Uable to find the requested URL',
+		error: err.message
+	});
+});
 
 module.exports = Router;
