@@ -101,19 +101,19 @@ const authCtrl = {
 	},
 
 	verify: function(req, res) {
-
+		//TODO: Add in email verification and email sending
 	},
 
 	getForgot: function(req, res) {
-
+		//TODO: Add in a forgot password route and email sending
 	},
 
 	postForgot: function(req, res) {
-
+		//TODO: add in change password route here and email sending
 	},
 
 	updatePass: function(req, res) {
-
+		//TODO: add in email changing route here
 	},
 
 	decode: function(req, res, next) {
